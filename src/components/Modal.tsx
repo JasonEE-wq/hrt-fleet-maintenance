@@ -1,4 +1,4 @@
-import { useState, type FormEvent, type ReactNode } from 'react'
+import { useState, type FormEvent, type ReactNode } from 'react';
 import {
   BusFront,
   CheckCircle2,
@@ -15,8 +15,8 @@ import {
   Radio,
   Landmark,
   Ban,
-} from 'lucide-react'
-import { useFleet } from '../lib/context'
+} from 'lucide-react';
+import { useFleet } from '@/lib/context';
 import {
   DEMO_DATE,
   checkKeys,
@@ -28,44 +28,65 @@ import {
   type Check,
   type PartLine,
   type VehicleClass,
-} from '../lib/model'
-import { releaseChecks, totalCost, costCode } from '../lib/fleet'
-import { Button } from './ui/button'
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from './ui/dialog'
-import { Badge, Field, Info, RoleNote, Timeline, SectionHeader } from './common'
-import type { TranslationKey } from '../lib/i18n'
+} from '@/lib/model';
+import { releaseChecks, totalCost, costCode } from '@/lib/fleet';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import {
+  Badge,
+  Field,
+  Info,
+  RoleNote,
+  Timeline,
+  SectionHeader,
+} from '@/components/common';
+import type { TranslationKey } from '@/lib/i18n';
 
 export type ModalState =
   | null
   | { type: 'schedule'; vehicleId?: string; reinspection?: boolean }
   | { type: 'defect' }
-  | { type: 'inspection' | 'defectDetail' | 'order' | 'vehicle' | 'part'; id: string }
+  | {
+      type: 'inspection' | 'defectDetail' | 'order' | 'vehicle' | 'part';
+      id: string;
+    }
   | { type: 'reset' | 'guide' }
-  | { type: 'vehicleForm'; id?: string }
+  | { type: 'vehicleForm'; id?: string };
 
-export function Modal({
+export const Modal = ({
   modal,
   setModal,
   reset,
 }: {
-  modal: ModalState
-  setModal: (m: ModalState) => void
-  reset: () => void
-}) {
-  const { state, role, t, tx, money, run, lang } = useFleet()
-  const close = () => setModal(null)
+  modal: ModalState;
+  setModal: (m: ModalState) => void;
+  reset: () => void;
+}) => {
+  const { state, role, t, tx, money, run, lang } = useFleet();
+  const close = () => setModal(null);
   const selectedOrder =
-    modal?.type === 'order' ? state.orders.find((o) => o.id === modal.id) : undefined
+    modal?.type === 'order'
+      ? state.orders.find((o) => o.id === modal.id)
+      : undefined;
   const selectedInspection =
-    modal?.type === 'inspection' ? state.inspections.find((i) => i.id === modal.id) : undefined
-  const activeVehicles = state.vehicles.filter((v) => v.active)
+    modal?.type === 'inspection'
+      ? state.inspections.find((i) => i.id === modal.id)
+      : undefined;
+  const activeVehicles = state.vehicles.filter((v) => v.active);
   const [vehicleId, setVehicleId] = useState(
-    modal?.type === 'schedule' && modal.vehicleId ? modal.vehicleId : activeVehicles[0]?.id || '',
-  )
+    modal?.type === 'schedule' && modal.vehicleId
+      ? modal.vehicleId
+      : activeVehicles[0]?.id || '',
+  );
   const editing =
     modal?.type === 'vehicleForm' && modal.id
       ? state.vehicles.find((v) => v.id === modal.id)
-      : undefined
+      : undefined;
   const [vehicleForm, setVehicleForm] = useState({
     id: editing?.id || '',
     plate: editing?.plate || '',
@@ -76,40 +97,52 @@ export function Modal({
     vin: editing?.vin || '',
     mileage: editing?.mileage || 0,
     hours: editing?.hours || 0,
-  })
+  });
   const [date, setDate] = useState(DEMO_DATE),
     [inspectionType, setInspectionType] = useState<'routine' | 'reinspection'>(
-      modal?.type === 'schedule' && modal.reinspection ? 'reinspection' : 'routine',
-    )
-  const [inspectionTime, setInspectionTime] = useState('09:00')
+      modal?.type === 'schedule' && modal.reinspection
+        ? 'reinspection'
+        : 'routine',
+    );
+  const [inspectionTime, setInspectionTime] = useState('09:00');
   const [inspector, setInspector] = useState('Jamie Chen'),
     [severity, setSeverity] = useState<'minor' | 'critical'>('minor'),
-    [description, setDescription] = useState('')
+    [description, setDescription] = useState('');
   const [checks, setChecks] = useState<
     { key: string; result: '' | 'pass' | 'fail'; note: string }[]
   >(
     selectedInspection?.checks.length
       ? selectedInspection.checks
       : checkKeys.map((key) => ({ key, result: '', note: '' })),
-  )
+  );
   const [inspectionNotes, setInspectionNotes] = useState(
     selectedInspection ? tx(selectedInspection.note) : '',
-  )
-  const [assignee, setAssignee] = useState(selectedOrder?.assignee || '')
-  const [repairNote, setRepairNote] = useState(selectedOrder ? tx(selectedOrder.note) : '')
-  const [invoiceRef, setInvoiceRef] = useState(selectedOrder?.invoiceRef || '')
-  const [partLines, setPartLines] = useState<PartLine[]>(selectedOrder?.parts || [])
-  const [labourHours, setLabourHours] = useState(selectedOrder?.labourHours || 0),
-    [labourRate, setLabourRate] = useState(selectedOrder?.labourRate ?? 85)
+  );
+  const [assignee, setAssignee] = useState(selectedOrder?.assignee || '');
+  const [repairNote, setRepairNote] = useState(
+    selectedOrder ? tx(selectedOrder.note) : '',
+  );
+  const [invoiceRef, setInvoiceRef] = useState(selectedOrder?.invoiceRef || '');
+  const [partLines, setPartLines] = useState<PartLine[]>(
+    selectedOrder?.parts || [],
+  );
+  const [labourHours, setLabourHours] = useState(
+      selectedOrder?.labourHours || 0,
+    ),
+    [labourRate, setLabourRate] = useState(selectedOrder?.labourRate ?? 85);
   const [returnReason, setReturnReason] = useState(''),
     [showReturn, setShowReturn] = useState(false),
-    [stockQuantity, setStockQuantity] = useState(1)
+    [stockQuantity, setStockQuantity] = useState(1);
 
-  if (!modal) return null
-  const submit = (e: FormEvent, action: Parameters<typeof run>[0], dismiss = true) => {
-    e.preventDefault()
-    if (run(action) && dismiss) close()
-  }
+  if (!modal) return null;
+  const submit = (
+    e: FormEvent,
+    action: Parameters<typeof run>[0],
+    dismiss = true,
+  ) => {
+    e.preventDefault();
+    if (run(action) && dismiss) close();
+  };
   const options = (
     <>
       {activeVehicles.map((v) => (
@@ -118,7 +151,7 @@ export function Modal({
         </option>
       ))}
     </>
-  )
+  );
   const footer = (label: string, disabled = false): ReactNode => (
     <div className="dialog-footer">
       <Button type="button" variant="outline" onClick={close}>
@@ -128,14 +161,14 @@ export function Modal({
         {label}
       </Button>
     </div>
-  )
+  );
   let title = '',
     sub = '',
-    content: ReactNode
+    content: ReactNode;
 
   if (modal.type === 'schedule') {
-    title = t('inspectionForm')
-    sub = t('inspectionFormSub')
+    title = t('inspectionForm');
+    sub = t('inspectionFormSub');
     content = (
       <form
         onSubmit={(e) =>
@@ -152,7 +185,10 @@ export function Modal({
         <RoleNote allowed={['manager']} />
         <div className="form-grid">
           <Field label={t('vehicle')}>
-            <select value={vehicleId} onChange={(e) => setVehicleId(e.target.value)}>
+            <select
+              value={vehicleId}
+              onChange={(e) => setVehicleId(e.target.value)}
+            >
               {options}
             </select>
           </Field>
@@ -168,14 +204,19 @@ export function Modal({
           <Field label={t('inspectionType')}>
             <select
               value={inspectionType}
-              onChange={(e) => setInspectionType(e.target.value as 'routine' | 'reinspection')}
+              onChange={(e) =>
+                setInspectionType(e.target.value as 'routine' | 'reinspection')
+              }
             >
               <option value="routine">{t('routine')}</option>
               <option value="reinspection">{t('reinspection')}</option>
             </select>
           </Field>
           <Field label={t('inspectorName')}>
-            <select value={inspector} onChange={(e) => setInspector(e.target.value)}>
+            <select
+              value={inspector}
+              onChange={(e) => setInspector(e.target.value)}
+            >
               <option>Jamie Chen</option>
               <option>Robin Park</option>
             </select>
@@ -191,23 +232,32 @@ export function Modal({
         </div>
         {footer(t('saveSchedule'), role !== 'manager')}
       </form>
-    )
+    );
   } else if (modal.type === 'defect') {
-    title = t('defectForm')
-    sub = t('defectFormSub')
+    title = t('defectForm');
+    sub = t('defectFormSub');
     content = (
-      <form onSubmit={(e) => submit(e, { type: 'defect', vehicleId, severity, description })}>
+      <form
+        onSubmit={(e) =>
+          submit(e, { type: 'defect', vehicleId, severity, description })
+        }
+      >
         <RoleNote allowed={['inspector']} />
         <div className="form-grid">
           <Field label={t('vehicle')}>
-            <select value={vehicleId} onChange={(e) => setVehicleId(e.target.value)}>
+            <select
+              value={vehicleId}
+              onChange={(e) => setVehicleId(e.target.value)}
+            >
               {options}
             </select>
           </Field>
           <Field label={t('severity')}>
             <select
               value={severity}
-              onChange={(e) => setSeverity(e.target.value as 'minor' | 'critical')}
+              onChange={(e) =>
+                setSeverity(e.target.value as 'minor' | 'critical')
+              }
             >
               <option value="minor">{t('minor')}</option>
               <option value="critical">{t('critical')}</option>
@@ -225,20 +275,25 @@ export function Modal({
         </div>
         {footer(t('saveDefect'), role !== 'inspector')}
       </form>
-    )
+    );
   } else if (modal.type === 'inspection' && selectedInspection) {
-    const i = selectedInspection
-    title = `${i.id} · ${i.vehicleId}`
-    sub = t('inspectionResultSub')
+    const i = selectedInspection;
+    title = `${i.id} · ${i.vehicleId}`;
+    sub = t('inspectionResultSub');
     const editable =
       i.status === 'pending' &&
       role === 'inspector' &&
       i.assignee === users.inspector &&
-      i.date <= DEMO_DATE
+      i.date <= DEMO_DATE;
     content = (
       <form
         onSubmit={(e) =>
-          submit(e, { type: 'inspect', id: i.id, checks: checks as Check[], note: inspectionNotes })
+          submit(e, {
+            type: 'inspect',
+            id: i.id,
+            checks: checks as Check[],
+            note: inspectionNotes,
+          })
         }
       >
         <div className="detail-strip">
@@ -267,7 +322,9 @@ export function Modal({
                   onChange={(e) =>
                     setChecks(
                       checks.map((x) =>
-                        x.key === c.key ? { ...x, result: e.target.value as 'pass' | 'fail' } : x,
+                        x.key === c.key
+                          ? { ...x, result: e.target.value as 'pass' | 'fail' }
+                          : x,
                       ),
                     )
                   }
@@ -288,7 +345,9 @@ export function Modal({
                   placeholder={t('failureReason')}
                   onChange={(e) =>
                     setChecks(
-                      checks.map((x) => (x.key === c.key ? { ...x, note: e.target.value } : x)),
+                      checks.map((x) =>
+                        x.key === c.key ? { ...x, note: e.target.value } : x,
+                      ),
                     )
                   }
                 />
@@ -315,11 +374,11 @@ export function Modal({
         <h3 className="block-title">{t('history')}</h3>
         <Timeline entityId={i.id} />
       </form>
-    )
+    );
   } else if (modal.type === 'defectDetail') {
-    const d = state.defects.find((d) => d.id === modal.id)!
-    title = `${d.id} · ${d.vehicleId}`
-    sub = t('defectDetails')
+    const d = state.defects.find((d) => d.id === modal.id)!;
+    title = `${d.id} · ${d.vehicleId}`;
+    sub = t('defectDetails');
     content = (
       <>
         <div className="detail-strip">
@@ -333,7 +392,9 @@ export function Modal({
             {d.inspectionId ? (
               <button
                 className="text-link"
-                onClick={() => setModal({ type: 'inspection', id: d.inspectionId! })}
+                onClick={() =>
+                  setModal({ type: 'inspection', id: d.inspectionId! })
+                }
               >
                 {d.inspectionId}
               </button>
@@ -361,7 +422,7 @@ export function Modal({
               <Button
                 disabled={role !== 'manager'}
                 onClick={() => {
-                  if (run({ type: 'createOrder', defectId: d.id })) close()
+                  if (run({ type: 'createOrder', defectId: d.id })) close();
                 }}
               >
                 <Plus size={17} />
@@ -373,20 +434,27 @@ export function Modal({
         <h3 className="block-title">{t('history')}</h3>
         <Timeline entityId={d.id} />
       </>
-    )
+    );
   } else if (modal.type === 'order' && selectedOrder) {
-    const o = selectedOrder
-    title = `${o.id} · ${o.vehicleId}`
-    sub = tx(o.title)
+    const o = selectedOrder;
+    title = `${o.id} · ${o.vehicleId}`;
+    sub = tx(o.title);
     // 负责人可能是技师也可能是承包商
-    const byContractor = contractors.includes(o.assignee)
-    const worker = byContractor ? 'contractor' : 'technician'
-    const isAssignee = role === worker && o.assignee === users[role]
-    const editable = ['progress', 'returned'].includes(o.status) && isAssignee
-    const assignable = !['review', 'closed'].includes(o.status) && role === 'manager'
-    const updateLine = (index: number, key: keyof PartLine, value: string | number) =>
-      setPartLines(partLines.map((p, i) => (i === index ? { ...p, [key]: value } : p)))
-    const sum = totalCost({ parts: partLines, labourHours, labourRate })
+    const byContractor = contractors.includes(o.assignee);
+    const worker = byContractor ? 'contractor' : 'technician';
+    const isAssignee = role === worker && o.assignee === users[role];
+    const editable = ['progress', 'returned'].includes(o.status) && isAssignee;
+    const assignable =
+      !['review', 'closed'].includes(o.status) && role === 'manager';
+    const updateLine = (
+      index: number,
+      key: keyof PartLine,
+      value: string | number,
+    ) =>
+      setPartLines(
+        partLines.map((p, i) => (i === index ? { ...p, [key]: value } : p)),
+      );
+    const sum = totalCost({ parts: partLines, labourHours, labourRate });
     content = (
       <>
         <div className="detail-strip">
@@ -428,15 +496,19 @@ export function Modal({
           {o.status === 'assigned' && (
             <div className="start-row">
               <RoleNote allowed={[worker]} />
-              <Button disabled={!isAssignee} onClick={() => run({ type: 'start', id: o.id })}>
+              <Button
+                disabled={!isAssignee}
+                onClick={() => run({ type: 'start', id: o.id })}
+              >
                 <Wrench size={16} />
                 {t('startRepair')}
               </Button>
             </div>
           )}
-          {(role === 'technician' || role === 'contractor') && o.assignee !== users[role] && (
-            <div className="notice">{t('assignedOther')}</div>
-          )}
+          {(role === 'technician' || role === 'contractor') &&
+            o.assignee !== users[role] && (
+              <div className="notice">{t('assignedOther')}</div>
+            )}
         </section>
         {o.rejection && (
           <div className="notice notice-warning">
@@ -485,7 +557,11 @@ export function Modal({
                 onClick={() =>
                   setPartLines([
                     ...partLines,
-                    { partId: state.parts[0].id, quantity: 1, price: state.parts[0].price },
+                    {
+                      partId: state.parts[0].id,
+                      quantity: 1,
+                      price: state.parts[0].price,
+                    },
                   ])
                 }
               >
@@ -508,12 +584,16 @@ export function Modal({
                       disabled={!editable}
                       value={line.partId}
                       onChange={(e) => {
-                        const p = state.parts.find((p) => p.id === e.target.value)!
+                        const p = state.parts.find(
+                          (p) => p.id === e.target.value,
+                        )!;
                         setPartLines(
                           partLines.map((l, i) =>
-                            i === index ? { ...l, partId: p.id, price: p.price } : l,
+                            i === index
+                              ? { ...l, partId: p.id, price: p.price }
+                              : l,
                           ),
-                        )
+                        );
                       }}
                     >
                       {state.parts.map((p) => (
@@ -531,7 +611,9 @@ export function Modal({
                       required
                       disabled={!editable}
                       value={line.quantity}
-                      onChange={(e) => updateLine(index, 'quantity', Number(e.target.value))}
+                      onChange={(e) =>
+                        updateLine(index, 'quantity', Number(e.target.value))
+                      }
                     />
                   </Field>
                   <Field label={`${t('unitPrice')} AUD`}>
@@ -542,7 +624,9 @@ export function Modal({
                       required
                       disabled={!editable}
                       value={line.price}
-                      onChange={(e) => updateLine(index, 'price', Number(e.target.value))}
+                      onChange={(e) =>
+                        updateLine(index, 'price', Number(e.target.value))
+                      }
                     />
                   </Field>
                   <button
@@ -550,7 +634,9 @@ export function Modal({
                     className="remove-part"
                     disabled={!editable}
                     aria-label={`${t('remove')} ${index + 1}`}
-                    onClick={() => setPartLines(partLines.filter((_, i) => i !== index))}
+                    onClick={() =>
+                      setPartLines(partLines.filter((_, i) => i !== index))
+                    }
                   >
                     <Trash2 size={16} />
                   </button>
@@ -594,11 +680,17 @@ export function Modal({
               />
             </Field>
           )}
-          {byContractor && editable && <p className="form-hint">{t('invoiceHint')}</p>}
+          {byContractor && editable && (
+            <p className="form-hint">{t('invoiceHint')}</p>
+          )}
           <div className="cost-summary">
             <div>
               <span>{t('partsTotal')}</span>
-              <strong>{money(partLines.reduce((sum, p) => sum + p.quantity * p.price, 0))}</strong>
+              <strong>
+                {money(
+                  partLines.reduce((sum, p) => sum + p.quantity * p.price, 0),
+                )}
+              </strong>
             </div>
             <div>
               <span>{t('labourTotal')}</span>
@@ -642,8 +734,9 @@ export function Modal({
             ) : (
               <form
                 onSubmit={(e) => {
-                  e.preventDefault()
-                  if (run({ type: 'reject', id: o.id, reason: returnReason })) setShowReturn(false)
+                  e.preventDefault();
+                  if (run({ type: 'reject', id: o.id, reason: returnReason }))
+                    setShowReturn(false);
                 }}
               >
                 <Field label={t('returnReason')}>
@@ -656,7 +749,11 @@ export function Modal({
                   />
                 </Field>
                 <div className="dialog-footer">
-                  <Button type="button" variant="outline" onClick={() => setShowReturn(false)}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowReturn(false)}
+                  >
                     {t('cancel')}
                   </Button>
                   <Button type="submit" disabled={role !== 'reviewer'}>
@@ -703,12 +800,12 @@ export function Modal({
         <h3 className="block-title">{t('history')}</h3>
         <Timeline entityId={o.id} />
       </>
-    )
+    );
   } else if (modal.type === 'vehicle') {
     const v = state.vehicles.find((v) => v.id === modal.id)!,
-      checks = releaseChecks(state, v.id)
-    title = v.id
-    sub = `${v.plate} · ${v.model}`
+      checks = releaseChecks(state, v.id);
+    title = v.id;
+    sub = `${v.plate} · ${v.model}`;
     content = (
       <>
         <div className="vehicle-profile-header">
@@ -737,7 +834,9 @@ export function Modal({
                 variant="outline"
                 size="sm"
                 disabled={role !== 'manager'}
-                onClick={() => run({ type: 'deactivateVehicle', vehicleId: v.id })}
+                onClick={() =>
+                  run({ type: 'deactivateVehicle', vehicleId: v.id })
+                }
               >
                 <Ban size={14} />
                 {t('deactivate')}
@@ -755,13 +854,16 @@ export function Modal({
           <Radio size={16} />
           <span>
             {t('telemetrySynced')}:{' '}
-            {new Date(v.telemetryAt).toLocaleString(lang === 'zh' ? 'zh-CN' : 'en-AU', {
-              timeZone: 'Australia/Sydney',
-              month: 'short',
-              day: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit',
-            })}
+            {new Date(v.telemetryAt).toLocaleString(
+              lang === 'zh' ? 'zh-CN' : 'en-AU',
+              {
+                timeZone: 'Australia/Sydney',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+              },
+            )}
           </span>
           {v.active && (
             <Button
@@ -790,10 +892,16 @@ export function Modal({
           ).map((c) => (
             <div className="release-line" key={c.key}>
               <span className={checks[c.key] ? 'check-ready' : 'check-blocked'}>
-                {checks[c.key] ? <CheckCircle2 size={18} /> : <XCircle size={18} />}
+                {checks[c.key] ? (
+                  <CheckCircle2 size={18} />
+                ) : (
+                  <XCircle size={18} />
+                )}
               </span>
               <span>{t(c.label)}</span>
-              <strong className={checks[c.key] ? 'check-ready' : 'check-blocked'}>
+              <strong
+                className={checks[c.key] ? 'check-ready' : 'check-blocked'}
+              >
                 {t(checks[c.key] ? 'ready' : 'blocked')}
               </strong>
             </div>
@@ -804,18 +912,32 @@ export function Modal({
               <Button
                 variant="outline"
                 disabled={role !== 'manager'}
-                onClick={() => setModal({ type: 'schedule', vehicleId: v.id, reinspection: true })}
+                onClick={() =>
+                  setModal({
+                    type: 'schedule',
+                    vehicleId: v.id,
+                    reinspection: true,
+                  })
+                }
               >
                 <ClipboardCheck size={16} />
                 {t('scheduleReinspection')}
               </Button>
             )}
             <Button
-              disabled={v.status !== 'awaitingRelease' || !checks.ready || role !== 'reviewer'}
+              disabled={
+                v.status !== 'awaitingRelease' ||
+                !checks.ready ||
+                role !== 'reviewer'
+              }
               onClick={() => run({ type: 'release', vehicleId: v.id })}
             >
               <ShieldCheck size={16} />
-              {t(v.status === 'available' ? 'alreadyAvailable' : 'confirmRelease')}
+              {t(
+                v.status === 'available'
+                  ? 'alreadyAvailable'
+                  : 'confirmRelease',
+              )}
             </Button>
           </div>
           {!checks.ready && <p className="form-hint">{t('releaseNeeds')}</p>}
@@ -878,11 +1000,11 @@ export function Modal({
         <h3 className="block-title">{t('history')}</h3>
         <Timeline vehicleId={v.id} />
       </>
-    )
+    );
   } else if (modal.type === 'part') {
-    const p = state.parts.find((p) => p.id === modal.id)!
-    title = tx(p.name)
-    sub = `${p.sku} · ${tx(p.category)}`
+    const p = state.parts.find((p) => p.id === modal.id)!;
+    title = tx(p.name);
+    sub = `${p.sku} · ${tx(p.category)}`;
     content = (
       <>
         <div className="info-grid">
@@ -892,13 +1014,21 @@ export function Modal({
           <Info label={t('reorderAt')}>{p.minStock}</Info>
           <Info label={t('unitPrice')}>{money(p.price)}</Info>
           <Info label={t('status')}>
-            <Badge status={p.stock <= p.minStock ? 'lowStock' : 'healthyStock'} />
+            <Badge
+              status={p.stock <= p.minStock ? 'lowStock' : 'healthyStock'}
+            />
           </Info>
         </div>
         <h3 className="block-title">{t('receiveStock')}</h3>
         <RoleNote allowed={['manager']} />
         <form
-          onSubmit={(e) => submit(e, { type: 'restock', id: p.id, quantity: stockQuantity }, false)}
+          onSubmit={(e) =>
+            submit(
+              e,
+              { type: 'restock', id: p.id, quantity: stockQuantity },
+              false,
+            )
+          }
         >
           <div className="assignment-row">
             <Field label={t('receiveQuantity')}>
@@ -939,22 +1069,29 @@ export function Modal({
               <ArrowRight size={15} />
             </button>
           ))}
-        {!state.orders.some((o) => o.issued[p.id]) && <p className="muted">{t('noUsage')}</p>}
+        {!state.orders.some((o) => o.issued[p.id]) && (
+          <p className="muted">{t('noUsage')}</p>
+        )}
         <h3 className="block-title">{t('history')}</h3>
         <Timeline entityId={p.id} />
       </>
-    )
+    );
   } else if (modal.type === 'vehicleForm') {
-    title = editing ? `${t('editVehicle')} · ${editing.id}` : t('addVehicle')
-    sub = t(editing ? 'vehicleFormEdit' : 'vehicleFormNew')
+    title = editing ? `${t('editVehicle')} · ${editing.id}` : t('addVehicle');
+    sub = t(editing ? 'vehicleFormEdit' : 'vehicleFormNew');
     const set = (key: keyof typeof vehicleForm, value: string | number) =>
-      setVehicleForm({ ...vehicleForm, [key]: value })
+      setVehicleForm({ ...vehicleForm, [key]: value });
     content = (
       <form
         onSubmit={(e) => {
-          e.preventDefault()
-          if (run({ type: 'saveVehicle', isNew: !editing, vehicle: vehicleForm }))
-            setModal({ type: 'vehicle', id: vehicleForm.id.trim().toUpperCase() })
+          e.preventDefault();
+          if (
+            run({ type: 'saveVehicle', isNew: !editing, vehicle: vehicleForm })
+          )
+            setModal({
+              type: 'vehicle',
+              id: vehicleForm.id.trim().toUpperCase(),
+            });
         }}
       >
         <RoleNote allowed={['manager']} />
@@ -1007,14 +1144,21 @@ export function Modal({
             />
           </Field>
           <Field label={t('depot')}>
-            <select value={vehicleForm.depot} onChange={(e) => set('depot', e.target.value)}>
+            <select
+              value={vehicleForm.depot}
+              onChange={(e) => set('depot', e.target.value)}
+            >
               {depots.map((d) => (
                 <option key={d}>{d}</option>
               ))}
             </select>
           </Field>
           <Field label={t('vin')} span>
-            <input required value={vehicleForm.vin} onChange={(e) => set('vin', e.target.value)} />
+            <input
+              required
+              value={vehicleForm.vin}
+              onChange={(e) => set('vin', e.target.value)}
+            />
           </Field>
           <Field label={`${t('mileage')} km`}>
             <input
@@ -1037,10 +1181,10 @@ export function Modal({
         </div>
         {footer(t('saveVehicle'), role !== 'manager')}
       </form>
-    )
+    );
   } else if (modal.type === 'reset') {
-    title = t('resetTitle')
-    sub = t('resetBody')
+    title = t('resetTitle');
+    sub = t('resetBody');
     content = (
       <div className="reset-dialog">
         <span className="reset-illustration">
@@ -1052,25 +1196,33 @@ export function Modal({
           </Button>
           <Button
             onClick={() => {
-              reset()
-              close()
+              reset();
+              close();
             }}
           >
             {t('resetConfirm')}
           </Button>
         </div>
       </div>
-    )
+    );
   } else if (modal.type === 'guide') {
-    title = t('flowTitle')
-    sub = t('flowBody')
+    title = t('flowTitle');
+    sub = t('flowBody');
     content = (
       <div className="guide">
         <div className="guide-flow">{t('flowSteps')}</div>
         {(
           [
-            { role: 'manager', label: 'scheduleInspection', icon: ClipboardCheck },
-            { role: 'inspector', label: 'completeInspection', icon: ClipboardCheck },
+            {
+              role: 'manager',
+              label: 'scheduleInspection',
+              icon: ClipboardCheck,
+            },
+            {
+              role: 'inspector',
+              label: 'completeInspection',
+              icon: ClipboardCheck,
+            },
             { role: 'manager', label: 'createOrder', icon: Wrench },
             { role: 'technician', label: 'submitRepair', icon: Wrench },
             { role: 'reviewer', label: 'approve', icon: ShieldCheck },
@@ -1090,13 +1242,13 @@ export function Modal({
           <Button onClick={close}>{t('close')}</Button>
         </div>
       </div>
-    )
+    );
   }
   return (
     <Dialog
       open={!!modal}
       onOpenChange={(open) => {
-        if (!open) close()
+        if (!open) close();
       }}
     >
       <DialogContent closeLabel={t('close')}>
@@ -1108,5 +1260,5 @@ export function Modal({
         <div className="dialog-body">{content}</div>
       </DialogContent>
     </Dialog>
-  )
-}
+  );
+};

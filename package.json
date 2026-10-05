@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview --host 127.0.0.1",
     "test": "node --import tsx --test tests/*.test.ts",
-    "format": "prettier --write src tests index.html vite.config.ts tsconfig.json components.json README.md"
+    "prettier": "prettier --write src tests index.html vite.config.ts"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",

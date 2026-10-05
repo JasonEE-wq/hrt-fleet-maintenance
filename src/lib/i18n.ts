@@ -1,4 +1,4 @@
-import type { Language } from './model'
+import type { Language } from './model';
 
 const en = {
   dashboard: 'Overview',
@@ -17,7 +17,8 @@ const en = {
   demoDate: 'Demo date',
   reset: 'Reset demo data',
   resetTitle: 'Reset your workspace?',
-  resetBody: 'This will replace changes in this browser with the original fictional fleet data.',
+  resetBody:
+    'This will replace changes in this browser with the original fictional fleet data.',
   resetConfirm: 'Reset data',
   resetDone: 'Demo data restored',
   cancel: 'Cancel',
@@ -39,12 +40,17 @@ const en = {
   roleHint: 'Switch roles to explore each step of the workflow.',
   roleLocked: 'Switch to the required demo role to perform this action.',
   permissions: 'Role permissions',
-  dashboardSubtitle: 'A clear view of your fleet. Every vehicle, every next step.',
-  inspectionsSubtitle: 'Plan inspections, record results and catch issues early.',
+  dashboardSubtitle:
+    'A clear view of your fleet. Every vehicle, every next step.',
+  inspectionsSubtitle:
+    'Plan inspections, record results and catch issues early.',
   defectsSubtitle: 'Track vehicle issues from discovery to resolution.',
-  ordersSubtitle: 'Keep repairs moving, with every part and hour accounted for.',
-  vehiclesSubtitle: 'Vehicle history, safety checks and controlled return to service.',
-  maintenanceSubtitle: 'Stay ahead of service dates, mileage and engine-hour limits.',
+  ordersSubtitle:
+    'Keep repairs moving, with every part and hour accounted for.',
+  vehiclesSubtitle:
+    'Vehicle history, safety checks and controlled return to service.',
+  maintenanceSubtitle:
+    'Stay ahead of service dates, mileage and engine-hour limits.',
   partsSubtitle: 'Monitor stock, record usage and keep your workshop supplied.',
   greeting: 'Monday, 5 October 2026',
   overviewHeading: 'Your fleet, at a glance.',
@@ -126,7 +132,8 @@ const en = {
   saveSchedule: 'Save schedule',
   completeInspection: 'Record results',
   inspectionResult: 'Inspection results',
-  inspectionResultSub: 'Complete all five safety checks. Failed items create linked defects.',
+  inspectionResultSub:
+    'Complete all five safety checks. Failed items create linked defects.',
   brakes: 'Brakes & steering',
   tyres: 'Tyres & wheels',
   lights: 'Lights & signals',
@@ -141,7 +148,8 @@ const en = {
   inspectionComplete: 'This inspection has been completed.',
   defectList: 'Defect register',
   defectForm: 'Record a vehicle defect',
-  defectFormSub: 'Safety-critical issues take the vehicle out of service immediately.',
+  defectFormSub:
+    'Safety-critical issues take the vehicle out of service immediately.',
   defectDescription: 'Fault location and description',
   saveDefect: 'Save defect',
   createOrder: 'Create work order',
@@ -180,7 +188,8 @@ const en = {
   confirmReturn: 'Return record',
   returnedNote: 'Returned for amendment',
   orderClosed: 'Repair reviewed and work order closed.',
-  stockNote: 'Stock is issued on submission. Amendments adjust only the difference.',
+  stockNote:
+    'Stock is issued on submission. Amendments adjust only the difference.',
   assignedOther:
     'This repair is assigned to someone else. As the manager, assign it to Sam Taylor or Coastline Diesel to try that workflow.',
   releaseCheck: 'Release checklist',
@@ -233,12 +242,14 @@ const en = {
   export: 'Export CSV',
   records: 'records',
   dataSaved: 'Changes saved locally',
-  storageError: 'Browser storage is unavailable. Changes will only last for this session.',
+  storageError:
+    'Browser storage is unavailable. Changes will only last for this session.',
   navigation: 'Open navigation',
   collapse: 'Close navigation',
   demoLabel: 'SIMULATED DATA',
   flowTitle: 'Try the complete workflow',
-  flowBody: 'Switch roles as you inspect, repair, review and release a vehicle.',
+  flowBody:
+    'Switch roles as you inspect, repair, review and release a vehicle.',
   flowSteps: 'Inspect → Record defect → Repair → Review → Reinspect → Release',
   filter: 'Filter by status',
   view: 'View',
@@ -260,12 +271,15 @@ const en = {
   addVehicle: 'Register vehicle',
   editVehicle: 'Edit record',
   vehicleForm: 'Vehicle record',
-  vehicleFormNew: 'New vehicles start out of service until a first inspection passes.',
-  vehicleFormEdit: 'Fleet number cannot change. Readings cannot be lower than current values.',
+  vehicleFormNew:
+    'New vehicles start out of service until a first inspection passes.',
+  vehicleFormEdit:
+    'Fleet number cannot change. Readings cannot be lower than current values.',
   fleetNumber: 'Fleet number',
   saveVehicle: 'Save vehicle',
   deactivate: 'Deactivate record',
-  deactivateHint: 'Only possible when the vehicle has no open work orders or pending inspections.',
+  deactivateHint:
+    'Only possible when the vehicle has no open work orders or pending inspections.',
   inactive: 'Deactivated',
   telemetry: 'Telemetry',
   telemetrySynced: 'Last telemetry sync',
@@ -280,9 +294,9 @@ const en = {
   postFinance: 'Post to finance (demo)',
   financeHint:
     'Each closed work order can be posted once. The reference links the cost to the finance system.',
-}
+};
 
-export type TranslationKey = keyof typeof en
+export type TranslationKey = keyof typeof en;
 
 const zh: Record<TranslationKey, string> = {
   dashboard: '工作总览',
@@ -532,7 +546,8 @@ const zh: Record<TranslationKey, string> = {
   approvedContractors: '获批承包商',
   contractorTag: '承包商',
   portalTitle: '承包商门户',
-  portalNote: '受限视图：只显示发给 Coastline Diesel 的工单。承包商不能审核维修，也不能放行车辆。',
+  portalNote:
+    '受限视图：只显示发给 Coastline Diesel 的工单。承包商不能审核维修，也不能放行车辆。',
   invoiceRef: '承包商发票号',
   invoiceHint: '承包商提交时必填，供车间主管审核和财务对账。',
   allClasses: '全部车型',
@@ -552,7 +567,8 @@ const zh: Record<TranslationKey, string> = {
   telemetry: '遥测',
   telemetrySynced: '最近遥测同步',
   syncTelemetry: '模拟遥测同步',
-  telemetryHint: '仅为演示：模拟从遥测平台收到新读数，里程加 180 公里，发动机小时加 6。',
+  telemetryHint:
+    '仅为演示：模拟从遥测平台收到新读数，里程加 180 公里，发动机小时加 6。',
   financeTitle: '财务过账',
   costCode: '成本代码',
   financeRef: '财务参考号',
@@ -560,6 +576,7 @@ const zh: Record<TranslationKey, string> = {
   financePosted: '已过账',
   postFinance: '过账到财务系统（演示）',
   financeHint: '每张已关闭工单只能过账一次，参考号把费用关联到财务系统。',
-}
+};
 
-export const translate = (lang: Language, key: TranslationKey) => (lang === 'zh' ? zh : en)[key]
+export const translate = (lang: Language, key: TranslationKey) =>
+  (lang === 'zh' ? zh : en)[key];

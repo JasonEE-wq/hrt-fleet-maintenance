@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react';
 import {
   LayoutDashboard,
   ClipboardCheck,
@@ -20,9 +20,15 @@ import {
   Leaf,
   ShieldCheck,
   CircleHelp,
-} from 'lucide-react'
-import { createSeed } from './lib/seed'
-import { FleetError, transition, inspectionStatus, planStatus, totalCost } from './lib/fleet'
+} from 'lucide-react';
+import { createSeed } from '@/lib/seed';
+import {
+  FleetError,
+  transition,
+  inspectionStatus,
+  planStatus,
+  totalCost,
+} from '@/lib/fleet';
 import {
   DEMO_DATE,
   users,
@@ -35,22 +41,29 @@ import {
   type Page,
   type Vehicle,
   type Text,
-} from './lib/model'
-import { translate, type TranslationKey } from './lib/i18n'
-import { FleetContext } from './lib/context'
-import { Button } from './components/ui/button'
-import { Badge, SectionHeader, Toolbar, Empty, LinkButton, Timeline } from './components/common'
-import { Modal, type ModalState } from './components/Modal'
+} from '@/lib/model';
+import { translate, type TranslationKey } from '@/lib/i18n';
+import { FleetContext } from '@/lib/context';
+import { Button } from '@/components/ui/button';
+import {
+  Badge,
+  SectionHeader,
+  Toolbar,
+  Empty,
+  LinkButton,
+  Timeline,
+} from '@/components/common';
+import { Modal, type ModalState } from '@/components/Modal';
 
-const STORAGE = 'hrt-fleet-demo-v2'
+const STORAGE = 'hrt-fleet-demo-v2';
 
-function readState(): FleetState {
+const readState = (): FleetState => {
   try {
-    const saved = JSON.parse(localStorage.getItem(STORAGE) || 'null')
-    if (saved?.version === 2) return saved
+    const saved = JSON.parse(localStorage.getItem(STORAGE) || 'null');
+    if (saved?.version === 2) return saved;
   } catch {}
-  return createSeed()
-}
+  return createSeed();
+};
 
 const navItems: { key: Page; icon: typeof LayoutDashboard }[] = [
   { key: 'dashboard', icon: LayoutDashboard },
@@ -60,26 +73,28 @@ const navItems: { key: Page; icon: typeof LayoutDashboard }[] = [
   { key: 'vehicles', icon: BusFront },
   { key: 'maintenance', icon: CalendarClock },
   { key: 'parts', icon: Package },
-]
+];
 
-export default function App() {
-  const [state, setState] = useState(readState)
+const App: React.FC = () => {
+  const [state, setState] = useState(readState);
   const [lang, setLang] = useState<Language>(() =>
     localStorage.getItem('hrt-language') === 'zh' ? 'zh' : 'en',
-  )
-  const [role, setRole] = useState<Role>('manager')
-  const [page, setPage] = useState<Page>('dashboard')
+  );
+  const [role, setRole] = useState<Role>('manager');
+  const [page, setPage] = useState<Page>('dashboard');
   const [query, setQuery] = useState(''),
     [filter, setFilter] = useState('all'),
     [depot, setDepot] = useState('all'),
-    [vehicleClass, setVehicleClass] = useState('all')
+    [vehicleClass, setVehicleClass] = useState('all');
   const [modal, setModal] = useState<ModalState>(null),
-    [mobileNav, setMobileNav] = useState(false)
-  const [toast, setToast] = useState<{ text: string; error: boolean } | null>(null),
-    [storageError, setStorageError] = useState(false)
+    [mobileNav, setMobileNav] = useState(false);
+  const [toast, setToast] = useState<{ text: string; error: boolean } | null>(
+      null,
+    ),
+    [storageError, setStorageError] = useState(false);
 
   const t = (key: TranslationKey) => translate(lang, key),
-    tx = (value: Text) => value[lang]
+    tx = (value: Text) => value[lang];
 
   const money = (n: number) =>
     new Intl.NumberFormat(lang === 'zh' ? 'zh-CN' : 'en-AU', {
@@ -87,72 +102,80 @@ export default function App() {
       currency: 'AUD',
       currencyDisplay: 'code',
       maximumFractionDigits: 2,
-    }).format(n)
+    }).format(n);
 
   useEffect(() => {
-    document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en'
-    document.title = lang === 'zh' ? 'HRT · 车辆维护工作台' : 'HRT · Fleet Workspace'
-    localStorage.setItem('hrt-language', lang)
-  }, [lang])
+    document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+    document.title =
+      lang === 'zh' ? 'HRT · 车辆维护工作台' : 'HRT · Fleet Workspace';
+    localStorage.setItem('hrt-language', lang);
+  }, [lang]);
 
   useEffect(() => {
     try {
-      localStorage.setItem(STORAGE, JSON.stringify(state))
-      setStorageError(false)
+      localStorage.setItem(STORAGE, JSON.stringify(state));
+      setStorageError(false);
     } catch {
-      setStorageError(true)
+      setStorageError(true);
     }
-  }, [state])
+  }, [state]);
 
   useEffect(() => {
-    if (!toast) return
-    const timer = window.setTimeout(() => setToast(null), 4500)
-    return () => clearTimeout(timer)
-  }, [toast])
+    if (!toast) return;
+    const timer = window.setTimeout(() => setToast(null), 4500);
+    return () => clearTimeout(timer);
+  }, [toast]);
 
-  function run(action: Parameters<typeof transition>[1]) {
+  const run = (action: Parameters<typeof transition>[1]) => {
     try {
-      const updated = transition(state, action, role)
-      setState(updated)
-      setToast({ text: tx(updated.audit[0].message), error: false })
-      return true
+      const updated = transition(state, action, role);
+      setState(updated);
+      setToast({ text: tx(updated.audit[0].message), error: false });
+      return true;
     } catch (e) {
-      setToast({ text: e instanceof FleetError ? e[lang] : t('error'), error: true })
-      return false
+      setToast({
+        text: e instanceof FleetError ? e[lang] : t('error'),
+        error: true,
+      });
+      return false;
     }
-  }
+  };
 
-  function navigate(next: Page, nextFilter = 'all') {
-    setPage(next)
-    setQuery('')
-    setFilter(nextFilter)
-    setMobileNav(false)
-  }
+  const navigate = (next: Page, nextFilter = 'all') => {
+    setPage(next);
+    setQuery('');
+    setFilter(nextFilter);
+    setMobileNav(false);
+  };
 
-  const lookupVehicle = (id: string) => state.vehicles.find((v) => v.id === id)!
+  const lookupVehicle = (id: string) =>
+    state.vehicles.find((v) => v.id === id)!;
 
   const matches = (...values: (string | number)[]) =>
-    values.join(' ').toLowerCase().includes(query.trim().toLowerCase())
+    values.join(' ').toLowerCase().includes(query.trim().toLowerCase());
 
   const inScope = (id: string) => {
-    const v = lookupVehicle(id)
+    const v = lookupVehicle(id);
     return (
       (depot === 'all' || v.depot === depot) &&
       (vehicleClass === 'all' || v.vehicleClass === vehicleClass)
-    )
-  }
+    );
+  };
 
-  const permitted = (allowed: Role[]) => allowed.includes(role)
-  const isContractor = role === 'contractor'
+  const permitted = (allowed: Role[]) => allowed.includes(role);
+  const isContractor = role === 'contractor';
 
   // 只统计在册车辆
-  const fleet = state.vehicles.filter((v) => v.active && inScope(v.id))
+  const fleet = state.vehicles.filter((v) => v.active && inScope(v.id));
 
-  const count = (status: Vehicle['status']) => fleet.filter((v) => v.status === status).length
-  const availability = fleet.length ? Math.round((count('available') / fleet.length) * 100) : 0
+  const count = (status: Vehicle['status']) =>
+    fleet.filter((v) => v.status === status).length;
+  const availability = fleet.length
+    ? Math.round((count('available') / fleet.length) * 100)
+    : 0;
   const portalOrders = isContractor
     ? state.orders.filter((o) => o.assignee === users.contractor)
-    : state.orders
+    : state.orders;
   const queue = [
     {
       key: 'overdueInspections',
@@ -166,7 +189,9 @@ export default function App() {
     },
     {
       key: 'pendingReviews',
-      value: state.orders.filter((o) => inScope(o.vehicleId) && o.status === 'review').length,
+      value: state.orders.filter(
+        (o) => inScope(o.vehicleId) && o.status === 'review',
+      ).length,
       page: 'orders',
       filter: 'review',
       icon: Wrench,
@@ -182,49 +207,52 @@ export default function App() {
     },
     {
       key: 'serviceDue',
-      value: state.plans.filter((p) => inScope(p.vehicleId) && planStatus(p, state) !== 'scheduled')
-        .length,
+      value: state.plans.filter(
+        (p) => inScope(p.vehicleId) && planStatus(p, state) !== 'scheduled',
+      ).length,
       page: 'maintenance',
       filter: 'all',
       icon: CalendarClock,
       color: 'purple',
     },
-  ] as const
+  ] as const;
   const vehicles = state.vehicles.filter(
     (v) =>
       matches(v.id, v.plate, v.model, v.depot, t(v.vehicleClass)) &&
       inScope(v.id) &&
-      (filter === 'all' || (filter === 'inactive' ? !v.active : v.active && v.status === filter)),
-  )
+      (filter === 'all' ||
+        (filter === 'inactive' ? !v.active : v.active && v.status === filter)),
+  );
   const inspections = state.inspections.filter(
     (i) =>
       matches(i.id, i.vehicleId, t(i.type), i.assignee) &&
       inScope(i.vehicleId) &&
       (filter === 'all' || inspectionStatus(i) === filter),
-  )
+  );
   const defects = state.defects.filter(
     (d) =>
       matches(d.id, d.vehicleId, tx(d.description)) &&
       inScope(d.vehicleId) &&
       (filter === 'all' || d.status === filter || d.severity === filter),
-  )
+  );
   const orders = portalOrders.filter(
     (o) =>
       matches(o.id, o.vehicleId, tx(o.title), o.assignee) &&
       inScope(o.vehicleId) &&
       (filter === 'all' || o.status === filter),
-  )
+  );
   const plans = state.plans.filter(
     (p) =>
       matches(p.id, p.vehicleId, tx(p.title)) &&
       inScope(p.vehicleId) &&
       (filter === 'all' || planStatus(p, state) === filter),
-  )
+  );
   const parts = state.parts.filter(
     (p) =>
       matches(p.id, tx(p.name), p.sku, tx(p.category)) &&
-      (filter === 'all' || (p.stock <= p.minStock ? 'lowStock' : 'healthyStock') === filter),
-  )
+      (filter === 'all' ||
+        (p.stock <= p.minStock ? 'lowStock' : 'healthyStock') === filter),
+  );
   const visibleRecords =
     page === 'vehicles'
       ? vehicles
@@ -236,18 +264,27 @@ export default function App() {
             ? orders
             : page === 'maintenance'
               ? plans
-              : parts
+              : parts;
 
   // 导出 CSV，= + - @ 开头的前面加单引号，免得 Excel 当成公式
-  function exportCsv() {
+  const exportCsv = () => {
     const csvCell = (v: unknown) => {
-      const s = String(v ?? '')
-      return '"' + (/^[=+\-@\t\r]/.test(s) ? "'" + s : s).replaceAll('"', '""') + '"'
-    }
+      const s = String(v ?? '');
+      return (
+        '"' + (/^[=+\-@\t\r]/.test(s) ? "'" + s : s).replaceAll('"', '""') + '"'
+      );
+    };
     let headers: string[] = [],
-      rows: unknown[][] = []
+      rows: unknown[][] = [];
     if (page === 'inspections') {
-      headers = [t('recordId'), t('vehicle'), t('date'), t('type'), t('assignee'), t('status')]
+      headers = [
+        t('recordId'),
+        t('vehicle'),
+        t('date'),
+        t('type'),
+        t('assignee'),
+        t('status'),
+      ];
       rows = inspections.map((i) => [
         i.id,
         i.vehicleId,
@@ -255,7 +292,7 @@ export default function App() {
         t(i.type),
         i.assignee,
         t(inspectionStatus(i)),
-      ])
+      ]);
     } else if (page === 'defects') {
       headers = [
         t('recordId'),
@@ -264,7 +301,7 @@ export default function App() {
         t('severity'),
         t('status'),
         t('linkedOrder'),
-      ]
+      ];
       rows = defects.map((d) => [
         d.id,
         d.vehicleId,
@@ -272,7 +309,7 @@ export default function App() {
         t(d.severity),
         t(d.status),
         d.orderId,
-      ])
+      ]);
     } else if (page === 'orders') {
       headers = [
         t('recordId'),
@@ -283,7 +320,7 @@ export default function App() {
         t('total'),
         t('financeTitle'),
         t('financeRef'),
-      ]
+      ];
       rows = orders.map((o) => [
         o.id,
         o.vehicleId,
@@ -293,7 +330,7 @@ export default function App() {
         totalCost(o),
         o.finance ? t(o.finance) : '',
         o.financeRef,
-      ])
+      ]);
     } else if (page === 'vehicles') {
       headers = [
         t('vehicle'),
@@ -303,7 +340,7 @@ export default function App() {
         t('depot'),
         t('mileage'),
         t('status'),
-      ]
+      ];
       rows = vehicles.map((v) => [
         v.id,
         v.plate,
@@ -311,8 +348,14 @@ export default function App() {
         t(v.vehicleClass),
         v.depot,
         v.mileage,
-        t(!v.active ? 'inactive' : v.status === 'maintenance' ? 'maintenanceStatus' : v.status),
-      ])
+        t(
+          !v.active
+            ? 'inactive'
+            : v.status === 'maintenance'
+              ? 'maintenanceStatus'
+              : v.status,
+        ),
+      ]);
     } else if (page === 'maintenance') {
       headers = [
         t('recordId'),
@@ -322,7 +365,7 @@ export default function App() {
         t('dueMileage'),
         t('dueHours'),
         t('status'),
-      ]
+      ];
       rows = plans.map((p) => [
         p.id,
         p.vehicleId,
@@ -331,25 +374,45 @@ export default function App() {
         p.dueMileage,
         p.dueHours,
         t(planStatus(p, state)),
-      ])
+      ]);
     } else {
-      headers = [t('sku'), t('part'), t('category'), t('stock'), t('unitPrice')]
-      rows = parts.map((p) => [p.sku, tx(p.name), tx(p.category), p.stock, p.price])
+      headers = [
+        t('sku'),
+        t('part'),
+        t('category'),
+        t('stock'),
+        t('unitPrice'),
+      ];
+      rows = parts.map((p) => [
+        p.sku,
+        tx(p.name),
+        tx(p.category),
+        p.stock,
+        p.price,
+      ]);
     }
     const url = URL.createObjectURL(
-      new Blob(['\uFEFF' + [headers, ...rows].map((r) => r.map(csvCell).join(',')).join('\r\n')], {
-        type: 'text/csv;charset=utf-8;',
-      }),
-    )
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `HRT-${page}-${DEMO_DATE}.csv`
-    a.click()
-    URL.revokeObjectURL(url)
-  }
+      new Blob(
+        [
+          '\uFEFF' +
+            [headers, ...rows]
+              .map((r) => r.map(csvCell).join(','))
+              .join('\r\n'),
+        ],
+        {
+          type: 'text/csv;charset=utf-8;',
+        },
+      ),
+    );
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `HRT-${page}-${DEMO_DATE}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   // 首页和车辆页共用
-  function vehicleTable(list: Vehicle[]) {
+  const vehicleTable = (list: Vehicle[]) => {
     return (
       <div className="table-wrap">
         <table>
@@ -402,20 +465,24 @@ export default function App() {
         {!list.length && (
           <Empty
             clear={() => {
-              setQuery('')
-              setFilter('all')
-              setDepot('all')
-              setVehicleClass('all')
+              setQuery('');
+              setFilter('all');
+              setDepot('all');
+              setVehicleClass('all');
             }}
           />
         )}
       </div>
-    )
-  }
+    );
+  };
 
   const scopeSelects = (
     <>
-      <select aria-label={t('depot')} value={depot} onChange={(e) => setDepot(e.target.value)}>
+      <select
+        aria-label={t('depot')}
+        value={depot}
+        onChange={(e) => setDepot(e.target.value)}
+      >
         <option value="all">{t('allDepots')}</option>
         {depots.map((d) => (
           <option key={d}>{d}</option>
@@ -434,9 +501,10 @@ export default function App() {
         ))}
       </select>
     </>
-  )
+  );
 
-  const navLabel = (key: Page) => (isContractor && key === 'orders' ? t('portalTitle') : t(key))
+  const navLabel = (key: Page) =>
+    isContractor && key === 'orders' ? t('portalTitle') : t(key);
   return (
     <FleetContext.Provider value={{ state, lang, role, t, tx, money, run }}>
       <div className="app-shell">
@@ -452,8 +520,8 @@ export default function App() {
             className="brand"
             href="#"
             onClick={(e) => {
-              e.preventDefault()
-              navigate('dashboard')
+              e.preventDefault();
+              navigate('dashboard');
             }}
           >
             <span className="brand-mark">
@@ -486,14 +554,20 @@ export default function App() {
                 >
                   <Icon size={19} />
                   <span>{navLabel(key)}</span>
-                  {key === 'orders' && portalOrders.some((o) => o.status === 'review') && (
-                    <span className="nav-count">
-                      {portalOrders.filter((o) => o.status === 'review').length}
-                    </span>
-                  )}
+                  {key === 'orders' &&
+                    portalOrders.some((o) => o.status === 'review') && (
+                      <span className="nav-count">
+                        {
+                          portalOrders.filter((o) => o.status === 'review')
+                            .length
+                        }
+                      </span>
+                    )}
                 </button>
               ))}
-            {!isContractor && <p className="nav-label resource-label">{t('resources')}</p>}
+            {!isContractor && (
+              <p className="nav-label resource-label">{t('resources')}</p>
+            )}
             {navItems
               .slice(5)
               .filter(() => !isContractor)
@@ -525,7 +599,10 @@ export default function App() {
                 <ArrowRight size={15} />
               </button>
             </div>
-            <button className="reset-link" onClick={() => setModal({ type: 'reset' })}>
+            <button
+              className="reset-link"
+              onClick={() => setModal({ type: 'reset' })}
+            >
               <RotateCcw size={15} />
               {t('reset')}
             </button>
@@ -578,10 +655,10 @@ export default function App() {
                   aria-label={t('role')}
                   value={role}
                   onChange={(e) => {
-                    const next = e.target.value as Role
-                    setRole(next)
+                    const next = e.target.value as Role;
+                    setRole(next);
                     // 承包商只能看工单页
-                    if (next === 'contractor') navigate('orders')
+                    if (next === 'contractor') navigate('orders');
                   }}
                 >
                   {roles.map((r) => (
@@ -597,16 +674,22 @@ export default function App() {
             <div className="page-heading">
               <div>
                 <div className="eyebrow">
-                  {page === 'dashboard' ? t('greeting') : `HRT / ${navLabel(page)}`}
+                  {page === 'dashboard'
+                    ? t('greeting')
+                    : `HRT / ${navLabel(page)}`}
                 </div>
-                <h1>{page === 'dashboard' ? t('overviewHeading') : navLabel(page)}</h1>
+                <h1>
+                  {page === 'dashboard' ? t('overviewHeading') : navLabel(page)}
+                </h1>
                 <p>{t((page + 'Subtitle') as TranslationKey)}</p>
               </div>
               <div className="heading-actions">
                 {page === 'dashboard' || page === 'inspections' ? (
                   <Button
                     disabled={!permitted(['manager'])}
-                    title={!permitted(['manager']) ? t('roleLocked') : undefined}
+                    title={
+                      !permitted(['manager']) ? t('roleLocked') : undefined
+                    }
                     onClick={() => setModal({ type: 'schedule' })}
                   >
                     <Plus size={17} />
@@ -615,7 +698,9 @@ export default function App() {
                 ) : page === 'vehicles' ? (
                   <Button
                     disabled={!permitted(['manager'])}
-                    title={!permitted(['manager']) ? t('roleLocked') : undefined}
+                    title={
+                      !permitted(['manager']) ? t('roleLocked') : undefined
+                    }
                     onClick={() => setModal({ type: 'vehicleForm' })}
                   >
                     <Plus size={17} />
@@ -638,8 +723,12 @@ export default function App() {
                 )}
               </div>
             </div>
-            {storageError && <div className="notice notice-warning">{t('storageError')}</div>}
-            {isContractor && <div className="notice portal-notice">{t('portalNote')}</div>}
+            {storageError && (
+              <div className="notice notice-warning">{t('storageError')}</div>
+            )}
+            {isContractor && (
+              <div className="notice portal-notice">{t('portalNote')}</div>
+            )}
             {page === 'dashboard' ? (
               <>
                 <div className="dashboard-filters">{scopeSelects}</div>
@@ -657,60 +746,79 @@ export default function App() {
                       <div>
                         <h2>{t('fleetAvailability')}</h2>
                         <p>
-                          {count('available')} / {fleet.length} {t('readyForService')}
+                          {count('available')} / {fleet.length}{' '}
+                          {t('readyForService')}
                         </p>
                       </div>
                     </div>
                     <div className="availability-track">
-                      {(['available', 'maintenance', 'grounded', 'awaitingRelease'] as const).map(
-                        (s) => (
-                          <span
-                            key={s}
-                            className={`track-${s}`}
-                            style={{
-                              width: `${fleet.length ? (count(s) / fleet.length) * 100 : 0}%`,
-                            }}
-                          />
-                        ),
-                      )}
+                      {(
+                        [
+                          'available',
+                          'maintenance',
+                          'grounded',
+                          'awaitingRelease',
+                        ] as const
+                      ).map((s) => (
+                        <span
+                          key={s}
+                          className={`track-${s}`}
+                          style={{
+                            width: `${fleet.length ? (count(s) / fleet.length) * 100 : 0}%`,
+                          }}
+                        />
+                      ))}
                     </div>
-                    <button className="hero-link" onClick={() => navigate('vehicles')}>
+                    <button
+                      className="hero-link"
+                      onClick={() => navigate('vehicles')}
+                    >
                       {t('viewFleet')}
                       <ArrowUpRight size={16} />
                     </button>
                   </div>
                   <div className="hero-stats">
-                    {(['available', 'maintenance', 'grounded', 'awaitingRelease'] as const).map(
-                      (s, i) => (
-                        <button
-                          key={s}
-                          className="hero-stat"
-                          onClick={() => navigate('vehicles', s)}
-                        >
-                          <span className={`hero-stat-icon stat-${s}`}>
-                            {i === 0 ? (
-                              <CheckCircle2 size={18} />
-                            ) : i === 1 ? (
-                              <Wrench size={18} />
-                            ) : i === 2 ? (
-                              <TriangleAlert size={18} />
-                            ) : (
-                              <ShieldCheck size={18} />
-                            )}
-                          </span>
-                          <span>{t(s === 'maintenance' ? 'maintenanceStatus' : s)}</span>
-                          <strong>
-                            {String(count(s)).padStart(2, '0')}
-                            <small>{t('vehiclesUnit')}</small>
-                          </strong>
-                        </button>
-                      ),
-                    )}
+                    {(
+                      [
+                        'available',
+                        'maintenance',
+                        'grounded',
+                        'awaitingRelease',
+                      ] as const
+                    ).map((s, i) => (
+                      <button
+                        key={s}
+                        className="hero-stat"
+                        onClick={() => navigate('vehicles', s)}
+                      >
+                        <span className={`hero-stat-icon stat-${s}`}>
+                          {i === 0 ? (
+                            <CheckCircle2 size={18} />
+                          ) : i === 1 ? (
+                            <Wrench size={18} />
+                          ) : i === 2 ? (
+                            <TriangleAlert size={18} />
+                          ) : (
+                            <ShieldCheck size={18} />
+                          )}
+                        </span>
+                        <span>
+                          {t(s === 'maintenance' ? 'maintenanceStatus' : s)}
+                        </span>
+                        <strong>
+                          {String(count(s)).padStart(2, '0')}
+                          <small>{t('vehiclesUnit')}</small>
+                        </strong>
+                      </button>
+                    ))}
                   </div>
                   <div className="hero-decoration" />
                 </section>
                 <section className="queue-section">
-                  <SectionHeader title={t('actionQueue')} sub={t('actionQueueSub')} />
+                  <SectionHeader
+                    title={t('actionQueue')}
+                    sub={t('actionQueueSub')}
+                  />
                   <div className="queue-grid">
                     {queue.map((q) => (
                       <button
@@ -736,7 +844,9 @@ export default function App() {
                       title={t('fleetSnapshot')}
                       sub={t('fleetSnapshotSub')}
                       action={
-                        <LinkButton onClick={() => navigate('vehicles')}>{t('viewAll')}</LinkButton>
+                        <LinkButton onClick={() => navigate('vehicles')}>
+                          {t('viewAll')}
+                        </LinkButton>
                       }
                     />
                     {vehicleTable(fleet.slice(0, 5))}
@@ -751,7 +861,10 @@ export default function App() {
                     </div>
                   </section>
                   <section className="panel activity-panel">
-                    <SectionHeader title={t('recentActivity')} sub={t('recentActivitySub')} />
+                    <SectionHeader
+                      title={t('recentActivity')}
+                      sub={t('recentActivitySub')}
+                    />
                     <div className="timeline">
                       {state.audit.slice(0, 5).map((e) => (
                         <div className="timeline-item" key={e.id}>
@@ -767,9 +880,15 @@ export default function App() {
                                 e.entityId.startsWith('WO')
                                   ? setModal({ type: 'order', id: e.entityId })
                                   : e.entityId.startsWith('IN')
-                                    ? setModal({ type: 'inspection', id: e.entityId })
+                                    ? setModal({
+                                        type: 'inspection',
+                                        id: e.entityId,
+                                      })
                                     : e.vehicleId
-                                      ? setModal({ type: 'vehicle', id: e.vehicleId })
+                                      ? setModal({
+                                          type: 'vehicle',
+                                          id: e.vehicleId,
+                                        })
                                       : navigate('parts')
                               }
                             >
@@ -791,18 +910,23 @@ export default function App() {
               <>
                 <div className="list-stats">
                   {page === 'vehicles'
-                    ? (['available', 'maintenance', 'grounded', 'awaitingRelease'] as const).map(
-                        (s) => (
-                          <button
-                            className={filter === s ? 'selected' : ''}
-                            key={s}
-                            onClick={() => setFilter(filter === s ? 'all' : s)}
-                          >
-                            <Badge status={s} />
-                            <strong>{count(s)}</strong>
-                          </button>
-                        ),
-                      )
+                    ? (
+                        [
+                          'available',
+                          'maintenance',
+                          'grounded',
+                          'awaitingRelease',
+                        ] as const
+                      ).map((s) => (
+                        <button
+                          className={filter === s ? 'selected' : ''}
+                          key={s}
+                          onClick={() => setFilter(filter === s ? 'all' : s)}
+                        >
+                          <Badge status={s} />
+                          <strong>{count(s)}</strong>
+                        </button>
+                      ))
                     : page === 'inspections'
                       ? ['pending', 'overdue', 'passed', 'failed'].map((s) => (
                           <button
@@ -812,19 +936,36 @@ export default function App() {
                           >
                             <Badge status={s} />
                             <strong>
-                              {state.inspections.filter((i) => inspectionStatus(i) === s).length}
+                              {
+                                state.inspections.filter(
+                                  (i) => inspectionStatus(i) === s,
+                                ).length
+                              }
                             </strong>
                           </button>
                         ))
                       : page === 'orders'
-                        ? ['pending', 'assigned', 'progress', 'review', 'closed'].map((s) => (
+                        ? [
+                            'pending',
+                            'assigned',
+                            'progress',
+                            'review',
+                            'closed',
+                          ].map((s) => (
                             <button
                               className={filter === s ? 'selected' : ''}
                               key={s}
-                              onClick={() => setFilter(filter === s ? 'all' : s)}
+                              onClick={() =>
+                                setFilter(filter === s ? 'all' : s)
+                              }
                             >
                               <Badge status={s} />
-                              <strong>{portalOrders.filter((o) => o.status === s).length}</strong>
+                              <strong>
+                                {
+                                  portalOrders.filter((o) => o.status === s)
+                                    .length
+                                }
+                              </strong>
                             </button>
                           ))
                         : page === 'defects'
@@ -832,11 +973,16 @@ export default function App() {
                               <button
                                 className={filter === s ? 'selected' : ''}
                                 key={s}
-                                onClick={() => setFilter(filter === s ? 'all' : s)}
+                                onClick={() =>
+                                  setFilter(filter === s ? 'all' : s)
+                                }
                               >
                                 <Badge status={s} />
                                 <strong>
-                                  {state.defects.filter((d) => d.status === s).length}
+                                  {
+                                    state.defects.filter((d) => d.status === s)
+                                      .length
+                                  }
                                 </strong>
                               </button>
                             ))
@@ -845,11 +991,17 @@ export default function App() {
                                 <button
                                   className={filter === s ? 'selected' : ''}
                                   key={s}
-                                  onClick={() => setFilter(filter === s ? 'all' : s)}
+                                  onClick={() =>
+                                    setFilter(filter === s ? 'all' : s)
+                                  }
                                 >
                                   <Badge status={s} />
                                   <strong>
-                                    {state.plans.filter((p) => planStatus(p, state) === s).length}
+                                    {
+                                      state.plans.filter(
+                                        (p) => planStatus(p, state) === s,
+                                      ).length
+                                    }
                                   </strong>
                                 </button>
                               ))
@@ -857,15 +1009,18 @@ export default function App() {
                                 <button
                                   className={filter === s ? 'selected' : ''}
                                   key={s}
-                                  onClick={() => setFilter(filter === s ? 'all' : s)}
+                                  onClick={() =>
+                                    setFilter(filter === s ? 'all' : s)
+                                  }
                                 >
                                   <Badge status={s} />
                                   <strong>
                                     {
                                       state.parts.filter(
                                         (p) =>
-                                          (p.stock <= p.minStock ? 'lowStock' : 'healthyStock') ===
-                                          s,
+                                          (p.stock <= p.minStock
+                                            ? 'lowStock'
+                                            : 'healthyStock') === s,
                                       ).length
                                     }
                                   </strong>
@@ -901,13 +1056,32 @@ export default function App() {
                     setFilter={setFilter}
                     statuses={
                       page === 'vehicles'
-                        ? ['available', 'maintenance', 'grounded', 'awaitingRelease', 'inactive']
+                        ? [
+                            'available',
+                            'maintenance',
+                            'grounded',
+                            'awaitingRelease',
+                            'inactive',
+                          ]
                         : page === 'inspections'
                           ? ['pending', 'overdue', 'passed', 'failed']
                           : page === 'orders'
-                            ? ['pending', 'assigned', 'progress', 'review', 'returned', 'closed']
+                            ? [
+                                'pending',
+                                'assigned',
+                                'progress',
+                                'review',
+                                'returned',
+                                'closed',
+                              ]
                             : page === 'defects'
-                              ? ['open', 'processing', 'resolved', 'critical', 'minor']
+                              ? [
+                                  'open',
+                                  'processing',
+                                  'resolved',
+                                  'critical',
+                                  'minor',
+                                ]
                               : page === 'maintenance'
                                 ? ['overdue', 'dueSoon', 'scheduled']
                                 : ['healthyStock', 'lowStock']
@@ -982,7 +1156,12 @@ export default function App() {
                                 <td>
                                   <button
                                     className="text-link"
-                                    onClick={() => setModal({ type: 'vehicle', id: i.vehicleId })}
+                                    onClick={() =>
+                                      setModal({
+                                        type: 'vehicle',
+                                        id: i.vehicleId,
+                                      })
+                                    }
                                   >
                                     {i.vehicleId}
                                   </button>
@@ -991,7 +1170,9 @@ export default function App() {
                                 <td>{t(i.type)}</td>
                                 <td>
                                   <span className="person-cell">
-                                    <span className="mini-avatar">{i.assignee[0]}</span>
+                                    <span className="mini-avatar">
+                                      {i.assignee[0]}
+                                    </span>
                                     {i.assignee}
                                   </span>
                                 </td>
@@ -1000,10 +1181,14 @@ export default function App() {
                                 </td>
                                 <td>
                                   <LinkButton
-                                    onClick={() => setModal({ type: 'inspection', id: i.id })}
+                                    onClick={() =>
+                                      setModal({ type: 'inspection', id: i.id })
+                                    }
                                   >
                                     {t(
-                                      i.status === 'pending' ? 'completeInspection' : 'viewDetails',
+                                      i.status === 'pending'
+                                        ? 'completeInspection'
+                                        : 'viewDetails',
                                     )}
                                   </LinkButton>
                                 </td>
@@ -1016,7 +1201,12 @@ export default function App() {
                                 <td>
                                   <button
                                     className="text-link"
-                                    onClick={() => setModal({ type: 'vehicle', id: d.vehicleId })}
+                                    onClick={() =>
+                                      setModal({
+                                        type: 'vehicle',
+                                        id: d.vehicleId,
+                                      })
+                                    }
                                   >
                                     {d.vehicleId}
                                   </button>
@@ -1033,7 +1223,12 @@ export default function App() {
                                 </td>
                                 <td>
                                   <LinkButton
-                                    onClick={() => setModal({ type: 'defectDetail', id: d.id })}
+                                    onClick={() =>
+                                      setModal({
+                                        type: 'defectDetail',
+                                        id: d.id,
+                                      })
+                                    }
                                   >
                                     {t('viewDetails')}
                                   </LinkButton>
@@ -1050,7 +1245,12 @@ export default function App() {
                                   ) : (
                                     <button
                                       className="text-link"
-                                      onClick={() => setModal({ type: 'vehicle', id: o.vehicleId })}
+                                      onClick={() =>
+                                        setModal({
+                                          type: 'vehicle',
+                                          id: o.vehicleId,
+                                        })
+                                      }
                                     >
                                       {o.vehicleId}
                                     </button>
@@ -1058,12 +1258,16 @@ export default function App() {
                                 </td>
                                 <td className="description-cell">
                                   {tx(o.title)}
-                                  <small>{o.defectIds.join(', ') || o.planId}</small>
+                                  <small>
+                                    {o.defectIds.join(', ') || o.planId}
+                                  </small>
                                 </td>
                                 <td>
                                   {o.assignee ? (
                                     <span className="person-cell">
-                                      <span className="mini-avatar">{o.assignee[0]}</span>
+                                      <span className="mini-avatar">
+                                        {o.assignee[0]}
+                                      </span>
                                       {o.assignee}
                                     </span>
                                   ) : (
@@ -1074,7 +1278,11 @@ export default function App() {
                                   <Badge status={o.status} />
                                 </td>
                                 <td>
-                                  <LinkButton onClick={() => setModal({ type: 'order', id: o.id })}>
+                                  <LinkButton
+                                    onClick={() =>
+                                      setModal({ type: 'order', id: o.id })
+                                    }
+                                  >
                                     {t('openOrder')}
                                   </LinkButton>
                                 </td>
@@ -1086,7 +1294,12 @@ export default function App() {
                                 <td>
                                   <button
                                     className="text-link"
-                                    onClick={() => setModal({ type: 'vehicle', id: p.vehicleId })}
+                                    onClick={() =>
+                                      setModal({
+                                        type: 'vehicle',
+                                        id: p.vehicleId,
+                                      })
+                                    }
                                   >
                                     {p.vehicleId}
                                   </button>
@@ -1099,15 +1312,24 @@ export default function App() {
                                   </small>
                                 </td>
                                 <td>{p.dueDate}</td>
-                                <td className="numeric">{p.dueMileage.toLocaleString()} km</td>
-                                <td className="numeric">{p.dueHours.toLocaleString()} h</td>
+                                <td className="numeric">
+                                  {p.dueMileage.toLocaleString()} km
+                                </td>
+                                <td className="numeric">
+                                  {p.dueHours.toLocaleString()} h
+                                </td>
                                 <td>
                                   <Badge status={planStatus(p, state)} />
                                 </td>
                                 <td>
                                   {p.orderId ? (
                                     <LinkButton
-                                      onClick={() => setModal({ type: 'order', id: p.orderId! })}
+                                      onClick={() =>
+                                        setModal({
+                                          type: 'order',
+                                          id: p.orderId!,
+                                        })
+                                      }
                                     >
                                       {p.orderId}
                                     </LinkButton>
@@ -1116,10 +1338,19 @@ export default function App() {
                                       variant="outline"
                                       size="sm"
                                       disabled={role !== 'manager'}
-                                      title={role !== 'manager' ? t('roleLocked') : undefined}
+                                      title={
+                                        role !== 'manager'
+                                          ? t('roleLocked')
+                                          : undefined
+                                      }
                                       onClick={() => {
-                                        if (run({ type: 'createOrder', planId: p.id })) {
-                                          navigate('orders')
+                                        if (
+                                          run({
+                                            type: 'createOrder',
+                                            planId: p.id,
+                                          })
+                                        ) {
+                                          navigate('orders');
                                         }
                                       }}
                                     >
@@ -1151,11 +1382,19 @@ export default function App() {
                                 <td className="numeric">{money(p.price)}</td>
                                 <td>
                                   <Badge
-                                    status={p.stock <= p.minStock ? 'lowStock' : 'healthyStock'}
+                                    status={
+                                      p.stock <= p.minStock
+                                        ? 'lowStock'
+                                        : 'healthyStock'
+                                    }
                                   />
                                 </td>
                                 <td>
-                                  <LinkButton onClick={() => setModal({ type: 'part', id: p.id })}>
+                                  <LinkButton
+                                    onClick={() =>
+                                      setModal({ type: 'part', id: p.id })
+                                    }
+                                  >
                                     {t('viewDetails')}
                                   </LinkButton>
                                 </td>
@@ -1166,10 +1405,10 @@ export default function App() {
                       {!visibleRecords.length && (
                         <Empty
                           clear={() => {
-                            setQuery('')
-                            setFilter('all')
-                            setDepot('all')
-                            setVehicleClass('all')
+                            setQuery('');
+                            setFilter('all');
+                            setDepot('all');
+                            setVehicleClass('all');
                           }}
                         />
                       )}
@@ -1179,7 +1418,11 @@ export default function App() {
                     <span>
                       {visibleRecords.length} {t('records')}
                     </span>
-                    <span>{page === 'maintenance' ? t('triggerNote') : t('demoHint')}</span>
+                    <span>
+                      {page === 'maintenance'
+                        ? t('triggerNote')
+                        : t('demoHint')}
+                    </span>
                   </div>
                 </section>
               </>
@@ -1200,12 +1443,12 @@ export default function App() {
           modal={modal}
           setModal={setModal}
           reset={() => {
-            setState(createSeed())
-            setQuery('')
-            setFilter('all')
-            setDepot('all')
-            setVehicleClass('all')
-            setToast({ text: t('resetDone'), error: false })
+            setState(createSeed());
+            setQuery('');
+            setFilter('all');
+            setDepot('all');
+            setVehicleClass('all');
+            setToast({ text: t('resetDone'), error: false });
           }}
         />
         {toast && (
@@ -1222,5 +1465,7 @@ export default function App() {
         )}
       </div>
     </FleetContext.Provider>
-  )
-}
+  );
+};
+
+export default App;

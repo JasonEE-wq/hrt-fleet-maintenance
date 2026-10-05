@@ -1,10 +1,40 @@
-import { bilingual as b, type FleetState } from './model'
+import { bilingual as b, type FleetState } from './model';
 
-export function createSeed(): FleetState {
+export const createSeed = (): FleetState => {
   const vehicles: FleetState['vehicles'] = [
-    ['BUS 008', 'HRT008', 'Volvo B8R', 'bus', 2022, 'Wollongong', 124820, 3820, 'available'],
-    ['BUS 017', 'HRT017', 'Scania K320', 'bus', 2020, 'Wollongong', 218450, 6450, 'maintenance'],
-    ['BUS 023', 'HRT023', 'Volvo B8R', 'bus', 2021, 'Shellharbour', 176280, 5110, 'grounded'],
+    [
+      'BUS 008',
+      'HRT008',
+      'Volvo B8R',
+      'bus',
+      2022,
+      'Wollongong',
+      124820,
+      3820,
+      'available',
+    ],
+    [
+      'BUS 017',
+      'HRT017',
+      'Scania K320',
+      'bus',
+      2020,
+      'Wollongong',
+      218450,
+      6450,
+      'maintenance',
+    ],
+    [
+      'BUS 023',
+      'HRT023',
+      'Volvo B8R',
+      'bus',
+      2021,
+      'Shellharbour',
+      176280,
+      5110,
+      'grounded',
+    ],
     [
       'BUS 041',
       'HRT041',
@@ -16,8 +46,28 @@ export function createSeed(): FleetState {
       2670,
       'awaitingRelease',
     ],
-    ['BUS 052', 'HRT052', 'Scania K320', 'bus', 2022, 'Shellharbour', 142100, 4220, 'available'],
-    ['BUS 063', 'HRT063', 'Volvo B8R', 'bus', 2024, 'Wollongong', 56780, 1810, 'available'],
+    [
+      'BUS 052',
+      'HRT052',
+      'Scania K320',
+      'bus',
+      2022,
+      'Shellharbour',
+      142100,
+      4220,
+      'available',
+    ],
+    [
+      'BUS 063',
+      'HRT063',
+      'Volvo B8R',
+      'bus',
+      2024,
+      'Wollongong',
+      56780,
+      1810,
+      'available',
+    ],
     [
       'BUS 076',
       'HRT076',
@@ -29,7 +79,17 @@ export function createSeed(): FleetState {
       8210,
       'available',
     ],
-    ['BUS 089', 'HRT089', 'Volvo B8R', 'bus', 2023, 'Wollongong', 98240, 2980, 'available'],
+    [
+      'BUS 089',
+      'HRT089',
+      'Volvo B8R',
+      'bus',
+      2023,
+      'Wollongong',
+      98240,
+      2980,
+      'available',
+    ],
     [
       'CTV 104',
       'HRT104',
@@ -54,7 +114,7 @@ export function createSeed(): FleetState {
     vin: `HRTDEMO0000000${String(i + 1).padStart(4, '0')}`,
     active: true,
     telemetryAt: '2026-10-04T20:00:00Z',
-  }))
+  }));
   return {
     version: 2,
     vehicles,
@@ -128,7 +188,10 @@ export function createSeed(): FleetState {
       {
         id: 'DF-0021',
         vehicleId: 'BUS 017',
-        description: b('Front brake pads below wear limit', '前制动片磨损超过限值'),
+        description: b(
+          'Front brake pads below wear limit',
+          '前制动片磨损超过限值',
+        ),
         severity: 'critical',
         status: 'processing',
         date: '2026-10-02',
@@ -153,7 +216,10 @@ export function createSeed(): FleetState {
       {
         id: 'DF-0020',
         vehicleId: 'BUS 041',
-        description: b('Intermittent door sensor signal', '车门传感器信号不稳定'),
+        description: b(
+          'Intermittent door sensor signal',
+          '车门传感器信号不稳定',
+        ),
         severity: 'critical',
         status: 'resolved',
         date: '2026-09-30',
@@ -162,7 +228,10 @@ export function createSeed(): FleetState {
       {
         id: 'DF-0019',
         vehicleId: 'BUS 052',
-        description: b('Rear air-conditioning not cooling', '车厢后部空调不制冷'),
+        description: b(
+          'Rear air-conditioning not cooling',
+          '车厢后部空调不制冷',
+        ),
         severity: 'minor',
         status: 'processing',
         date: '2026-10-03',
@@ -354,7 +423,10 @@ export function createSeed(): FleetState {
         role: 'reviewer',
         entityId: 'WO-0040',
         vehicleId: 'BUS 041',
-        message: b('Repair reviewed and work order closed', '维修审核通过，工单已关闭'),
+        message: b(
+          'Repair reviewed and work order closed',
+          '维修审核通过，工单已关闭',
+        ),
       },
       {
         id: 'EV-0001',
@@ -366,5 +438,5 @@ export function createSeed(): FleetState {
         message: b('Brake pad replacement started', '开始更换制动片'),
       },
     ],
-  }
-}
+  };
+};
